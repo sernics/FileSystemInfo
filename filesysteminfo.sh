@@ -6,14 +6,6 @@ function system_info() {
   df -h | tail -n +2 | sort -u -k 1,1 | sort | uniq | awk '{ printf "||%-20s |%-20s |%-20s||\n", $1, $3, $6}'
 }
 
-function higher() {
-
-}
-
-function lower() {
-  
-}
-
 function main() {
   echo "||Filesystem           |Size                 |Mountpoint          ||"
   echo "||---------------------|---------------------|--------------------||"
@@ -54,5 +46,5 @@ if [ $# -gt 0 ]; then
     esac
   done
 else
-  system_info_advanced
+  main
 fi
