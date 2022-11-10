@@ -3,7 +3,21 @@
 set -e
 
 function system_info() {
-  df -h | tail -n +2 | sort -n | uniq | awk '{ printf "||%-20s |%-20s |%-20s||\n", $1, $3, $6}'
+  df -h | tail -n +2 | sort -u -k 1,1 | sort | uniq | awk '{ printf "||%-20s |%-20s |%-20s||\n", $1, $3, $6}'
+}
+
+function higher() {
+
+}
+
+function lower() {
+  
+}
+
+function main() {
+  echo "||Filesystem           |Size                 |Mountpoint          ||"
+  echo "||---------------------|---------------------|--------------------||"
+  system_info
 }
 
 function helper() {
@@ -15,7 +29,7 @@ function helper() {
 }
 
 function inverse() {
-  df -h | tail -n +2 | sort -n -r | uniq | awk '{ printf "|| %-20s | %-20s | %-20s||\n", $1, $3, $6}'
+  df -h | tail -n +2 | sort -u -k 1,1 | sort -n -r | uniq | awk '{ printf "||%-20s |%-20s |%-20s||\n", $1, $3, $6}'
 }
 
 if [ $# -gt 0 ]; then
@@ -29,6 +43,10 @@ if [ $# -gt 0 ]; then
         inverse
         shift
         ;;
+      "--modificacion")
+        ps -A -o size --no-headers | awk '{ sum+=$1 } END { print sum }'
+        shift
+        ;;
       * )
         echo $1
         shift
@@ -36,5 +54,5 @@ if [ $# -gt 0 ]; then
     esac
   done
 else
-  system_info
+  system_info_advanced
 fi
