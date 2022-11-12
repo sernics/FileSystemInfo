@@ -3,13 +3,39 @@
 set -e
 
 function system_info() {
-  df -h | tail -n +2 | sort -u -k 1,1 | sort | uniq | awk '{ printf "||%-20s |%-20s |%-20s||\n", $1, $3, $6}'
+  echo "||-----------------------------------------------------------------------------------------------------||"
+  echo "|| Filesistem                    | Space               | Uso%                | Mount on                ||"
+  echo "||-----------------------------------------------------------------------------------------------------||"
+  # Tipos es el tipo de sistema de archivos
+  tipos=$(cat /proc/mounts | tail -n +2 | cut -d  ' ' -f3 | sort -u)
+  tabla=""
+  for tipo in $tipos; do
+    line=$tipo
+    line+=" "
+    line+=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 2,5,6)
+    line=$(printf "||%-30s |%-20s |%-20s |%-25s||\n" $line)
+    tabla="$tabla""$line"
+    tabla+=$'\n'"||-----------------------------------------------------------------------------------------------------||"$'\n'
+  done
+  echo "$tabla"
 }
 
-function main() {
-  echo "||Filesystem           |Size                 |Mountpoint          ||"
-  echo "||---------------------|---------------------|--------------------||"
-  system_info
+function inverse() {
+  echo "||-----------------------------------------------------------------------------------------------------||"
+  echo "|| Filesistem                    | Space               | Uso%                | Mount on                ||"
+  echo "||-----------------------------------------------------------------------------------------------------||"
+  # Tipos es el tipo de sistema de archivos
+  tipos=$(cat /proc/mounts | tail -n +2 | cut -d  ' ' -f3 | sort -u | sort -r)
+  tabla=""
+  for tipo in $tipos; do
+    line=$tipo
+    line+=" "
+    line+=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 2,5,6)
+    line=$(printf "||%-30s |%-20s |%-20s |%-25s||\n" $line)
+    tabla="$tabla""$line"
+    tabla+=$'\n'"||-----------------------------------------------------------------------------------------------------||"$'\n'
+  done
+  echo "$tabla"
 }
 
 function helper() {
@@ -18,10 +44,6 @@ function helper() {
   echo "It is not necesary a FILE, but if you introduce a FILE you will get the output in the file (This will be in the future"
   echo ""
   echo "-inv,       Print the inverse of the main output"
-}
-
-function inverse() {
-  df -h | tail -n +2 | sort -u -k 1,1 | sort -n -r | uniq | awk '{ printf "||%-20s |%-20s |%-20s||\n", $1, $3, $6}'
 }
 
 if [ $# -gt 0 ]; then
@@ -35,10 +57,6 @@ if [ $# -gt 0 ]; then
         inverse
         shift
         ;;
-      "--modificacion")
-        ps -A -o size --no-headers | awk '{ sum+=$1 } END { print sum }'
-        shift
-        ;;
       * )
         echo $1
         shift
@@ -46,5 +64,5 @@ if [ $# -gt 0 ]; then
     esac
   done
 else
-  main
+  system_info
 fi
