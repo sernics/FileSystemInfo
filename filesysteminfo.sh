@@ -4,15 +4,15 @@ set -e
 
 function system_info() {
   echo "||-----------------------------------------------------------------------------------------------------||"
-  echo "|| Filesistem                    | Space               | Uso%                | Mount on                ||"
+  echo "||Filesistem                     |Dispositive name     |Storage              |Mount on                 ||"
   echo "||-----------------------------------------------------------------------------------------------------||"
   # Tipos es el tipo de sistema de archivos
-  tipos=$(cat /proc/mounts | tail -n +2 | cut -d  ' ' -f3 | sort -u)
+  tipos=$(cat /proc/mounts | cut -d  ' ' -f3 | sort -u)
   tabla=""
   for tipo in $tipos; do
     line=$tipo
     line+=" "
-    line+=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 2,5,6)
+    line+=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1,3,6)
     line=$(printf "||%-30s |%-20s |%-20s |%-25s||\n" $line)
     tabla="$tabla""$line"
     tabla+=$'\n'"||-----------------------------------------------------------------------------------------------------||"$'\n'
