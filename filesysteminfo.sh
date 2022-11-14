@@ -32,7 +32,7 @@ function device_files() {
   for tipo in $tipos; do
     line=$tipo
     line+=" "
-    line+=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1,3,6)
+    line+=$(df -a -t $tipo | tr -s ' ' | tail -n +2 | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1,3,6)
     total_used=$(df -a -t $tipo | awk 'BEGIN {total=0} {total = total + $3} END {print total}')
     dispositive=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1)
     if [ -e $dispositive ]; then
@@ -59,7 +59,7 @@ function inverse() {
   for tipo in $tipos; do
     line=$tipo
     line+=" "
-    line+=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1,3,6)
+    line+=$(df -a -t $tipo | tr -s ' ' | tail -n +2 | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1,3,6)
     total_used=$(df -a -t $tipo | awk 'BEGIN {total=0} {total = total + $3} END {print total}')
     line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s ||\n" $line $total_used)
     
