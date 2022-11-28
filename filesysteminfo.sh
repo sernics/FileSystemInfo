@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# TODO:
+# - Usuarios
+# - Ordenaciones: 
+#   - sopen: La ordenación se hará por el número de archivos abiertos, y solo se podrá usar con las opciones -devicefiles y/o -u, dado que solo se considerarán los dispositivos con archivos de dispositivo asociados. 
+#Si no se cumple esta regla debe producirse un error que deberá ser gestionado correctamente en el script.
+#   - sdevice: la ordenación se realizará por el número total de dispositivos considerados para cada sistema de archivos.
+#   - inv: la ordenación se realizará por el número total de dispositivos considerados para cada sistema de archivos, pero en orden inverso.
+#  DEBEN PODER SER USADAS JUNTAS, POR EJEMPLO: -sopen -inv -u sernics
+
+# Esta linea la pongo para que se me ejecute el script en modo desarrollador
 set -e
 
 are_usuarios=0
@@ -26,9 +36,9 @@ function system_info() {
 }
 
 function device_files() {
-  echo "||---------------------------------------------------------------------------------------------------------------------------------------------------------||"
-  echo "||Filesistem                     |Dispositive name     |Storage              |Mount on                  |Total Used      |Stat Lower      |Stat Higher     ||"
-  echo "||---------------------------------------------------------------------------------------------------------------------------------------------------------||"
+  echo "||--------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"
+  echo "||Filesistem                     |Dispositive name     |Storage              |Mount on                  |Total Used      |Stat Lower      |Stat Higher     |Lsof            ||"
+  echo "||--------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"
   # Tipos es el tipo de sistema de archivos
   tipos=$(cat /proc/mounts | cut -d  ' ' -f3 | sort -u)
   tabla=""
@@ -41,13 +51,15 @@ function device_files() {
     if [ -e $dispositive ]; then
       stat_lower=$(stat -c %t $dispositive)
       stat_higher=$(stat -c %T $dispositive)
-      line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s ||\n" $line $total_used $stat_lower $stat_higher)
+      lsof_value=$(lsof $dispositive | wc -l)
+      line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s |%-15s ||\n" $line $total_used $stat_lower $stat_higher $lsof_value)
     else
-      line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s ||\n" $line $total_used "*" "*")
+      asterisco="*"
+      line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s |%-15s ||\n" $line $total_used "*" "*" "*")
     fi
     
     tabla="$tabla""$line"
-    tabla+=$'\n'"||---------------------------------------------------------------------------------------------------------------------------------------------------------||"$'\n'
+    tabla+=$'\n'"||--------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"$'\n'                               
   done
   echo "$tabla"
 }
@@ -77,7 +89,7 @@ function helper() {
   echo "This script is to get information about our diferents partitions of the disk"
   echo "It is not necesary a FILE, but if you introduce a FILE you will get the output in the file (This will be in the future"
   echo ""
-  echo "-inv,       Print the inverse of the main output"
+  echo "-inv       Print the inverse of the main output"
 }
 
 if [ $# -gt 0 ]; then
@@ -95,6 +107,7 @@ if [ $# -gt 0 ]; then
             are_usuarios=1
             usuarios=$1
             usuarios+=" "
+            # Implementar función para los usuarios
           else
             echo "The user $1 is not a valid user"
           fi
