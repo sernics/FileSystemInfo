@@ -14,11 +14,37 @@ set -e
 
 are_usuarios=0
 usuarios=""
+bool_device_files=0
+bool_sopen=0
+bool_sdevice=0
+bool_inv=0
+
+sort_method="sort -u"
+
+lines=""
+
+function print_header() {
+  info="Filesistem Dispositive_name Storage Mount_on Total_Used Stat_Lower Stat_Higher"
+  if [ $bool_device_files -eq 1 ]; then
+  info+=" Device_files"
+    echo "||--------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"
+    header=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s |%-15s ||\n" $info)
+    echo "$header"
+    echo "||--------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"
+  else
+    echo "||---------------------------------------------------------------------------------------------------------------------------------------------------------||"
+    header=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s ||\n" $info)
+    echo "$header"
+    echo "||---------------------------------------------------------------------------------------------------------------------------------------------------------||"
+  fi
+}
+
+# Al entregarla cambiarle el nombre a system_info
+function definitive_function() {
+  echo
+}
 
 function system_info() {
-  echo "||-----------------------------------------------------------------------------------------------------------------------||"
-  echo "||Filesistem                     |Dispositive name     |Storage              |Mount on                  |Total Used      ||"
-  echo "||-----------------------------------------------------------------------------------------------------------------------||"
   # Tipos es el tipo de sistema de archivos
   tipos=$(cat /proc/mounts | cut -d  ' ' -f3 | sort -u)
   tabla=""
@@ -36,11 +62,11 @@ function system_info() {
 }
 
 function device_files() {
-  echo "||--------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"
-  echo "||Filesistem                     |Dispositive name     |Storage              |Mount on                  |Total Used      |Stat Lower      |Stat Higher     |Lsof            ||"
-  echo "||--------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"
+  if [ $bool_inv -eq 1 ]; then
+    sort_method+=" -r"
+  fi
   # Tipos es el tipo de sistema de archivos
-  tipos=$(cat /proc/mounts | cut -d  ' ' -f3 | sort -u)
+  tipos=$(cat /proc/mounts | cut -d  ' ' -f3 | ${sort_method})
   tabla=""
   for tipo in $tipos; do
     line=$tipo
@@ -51,37 +77,19 @@ function device_files() {
     if [ -e $dispositive ]; then
       stat_lower=$(stat -c %t $dispositive)
       stat_higher=$(stat -c %T $dispositive)
-      lsof_value=$(lsof $dispositive | wc -l)
-      line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s |%-15s ||\n" $line $total_used $stat_lower $stat_higher $lsof_value)
-    else
-      asterisco="*"
-      line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s |%-15s ||\n" $line $total_used "*" "*" "*")
+      # lsof_value=$(lsof $dispositive | wc -l)
+      #line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s ||\n" $line $total_used $stat_lower $stat_higher)
+      lines+="$line $total_used $stat_lower $stat_higher"
+      lines+=$'\n'
+    else 
+      #line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s ||\n" $line $total_used "*" "*")
+      lines+="$line $total_used * *"
+      lines+=$'\n'
     fi
     
-    tabla="$tabla""$line"
-    tabla+=$'\n'"||--------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"$'\n'                               
+    #tabla="$tabla""$line"
+    #tabla+=$'\n'"||---------------------------------------------------------------------------------------------------------------------------------------------------------||"$'\n'                               
   done
-  echo "$tabla"
-}
-
-function inverse() {
-  echo "||-----------------------------------------------------------------------------------------------------------------------||"
-  echo "||Filesistem                     |Dispositive name     |Storage              |Mount on                  |Total Used      ||"
-  echo "||-----------------------------------------------------------------------------------------------------------------------||"
-  # Tipos es el tipo de sistema de archivos
-  tipos=$(cat /proc/mounts | cut -d  ' ' -f3 | sort -u -r)
-  tabla=""
-  for tipo in $tipos; do
-    line=$tipo
-    line+=" "
-    line+=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1,3,6)
-    total_used=$(df -a -t $tipo | awk 'BEGIN {total=0} {total = total + $3} END {print total}')
-    line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s ||\n" $line $total_used)
-    
-    tabla="$tabla""$line"
-    tabla+=$'\n'"||-----------------------------------------------------------------------------------------------------------------------||"$'\n'
-  done
-  echo "$tabla"
 }
 
 function helper() {
@@ -118,11 +126,19 @@ if [ $# -gt 0 ]; then
         shift
         ;;
       "-inv" )
-        inverse
+        bool_inv=1
         shift
         ;;
       "-devicefiles")
-        device_files
+        bool_device_files=1
+        shift
+        ;;
+      "-sopen")
+        bool_sopen=1
+        shift
+        ;;
+      "-sdevice")
+        bool_sdevice=1
         shift
         ;;
       * )
@@ -131,6 +147,9 @@ if [ $# -gt 0 ]; then
         ;;
     esac
   done
-else
-  system_info
+else 
+  echo
 fi
+print_header
+device_files
+echo "$lines"
