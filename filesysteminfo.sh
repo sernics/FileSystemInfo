@@ -44,23 +44,6 @@ function definitive_function() {
   echo
 }
 
-function system_info() {
-  # Tipos es el tipo de sistema de archivos
-  tipos=$(cat /proc/mounts | cut -d  ' ' -f3 | sort -u)
-  tabla=""
-  for tipo in $tipos; do
-    line=$tipo
-    line+=" "
-    line+=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1,3,6)
-    total_used=$(df -a -t $tipo | awk 'BEGIN {total=0} {total = total + $3} END {print total}')
-    line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s ||\n" $line $total_used)
-    
-    tabla="$tabla""$line"
-    tabla+=$'\n'"||-----------------------------------------------------------------------------------------------------------------------||"$'\n'
-  done
-  echo "$tabla"
-}
-
 function device_files() {
   if [ $bool_inv -eq 1 ]; then
     sort_method+=" -r"
@@ -74,19 +57,26 @@ function device_files() {
     line+=$(df -a -t $tipo | tr -s ' ' | tail -n +2 | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1,3,6)
     total_used=$(df -a -t $tipo | awk 'BEGIN {total=0} {total = total + $3} END {print total}')
     dispositive=$(df -a -t $tipo | tr -s ' ' | sort -k3 -n | tail -n -1 | cut -d ' ' -f 1)
-    if [ -e $dispositive ]; then
-      stat_lower=$(stat -c %t $dispositive)
-      stat_higher=$(stat -c %T $dispositive)
-      # lsof_value=$(lsof $dispositive | wc -l)
-      #line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s ||\n" $line $total_used $stat_lower $stat_higher)
-      lines+="$line $total_used $stat_lower $stat_higher"
-      lines+=$'\n'
+    if [ $bool_device_files -eq 1 ]; then
+      if [ -e $dispositive ]; then
+        stat_lower=$(stat -c %t $dispositive)
+        stat_higher=$(stat -c %T $dispositive)
+        lsof_value=$(lsof $dispositive | wc -l)
+        lines+="$line $total_used $stat_lower $stat_higher $lsof_value"
+        lines+=$'\n'
+      fi
     else 
-      #line=$(printf "||%-30s |%-20s |%-20s |%-25s |%-15s |%-15s |%-15s ||\n" $line $total_used "*" "*")
-      lines+="$line $total_used * *"
-      lines+=$'\n'
+      if [ -e $dispositive ]; then
+        stat_lower=$(stat -c %t $dispositive)
+        stat_higher=$(stat -c %T $dispositive)
+        lines+="$line $total_used $stat_lower $stat_higher"
+        lines+=$'\n'
+      else 
+        lines+="$line $total_used * *"
+        lines+=$'\n'
+      fi
     fi
-    
+
     #tabla="$tabla""$line"
     #tabla+=$'\n'"||---------------------------------------------------------------------------------------------------------------------------------------------------------||"$'\n'                               
   done
