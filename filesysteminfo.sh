@@ -62,6 +62,7 @@ function definitive_function() {
 
 function device_files() {
   if [ $bool_inv -eq 1 ]; then
+    # Añadimos el -r para que ordene de forma inversa
     sort_method+=" -r"
   fi
   # Tipos es el tipo de sistema de archivos
@@ -153,9 +154,10 @@ if [ $# -gt 0 ]; then
         ;;
     esac
   done
-else 
+else
   echo
 fi
+# Ejecución de las funciones necesarias
 print_header
 device_files
 print_table
