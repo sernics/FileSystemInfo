@@ -24,7 +24,7 @@ sort_method="sort -u"
 lines=""
 
 function print_header() {
-  info="Filesistem Dispositive_name Storage Mount_on Total_Used Stat_Lower Stat_Higher"
+  info="Filesistem Dispositive_name Storage Mount_on Total_Used Stat_Lower Stat_Higher"       
   if [ $bool_device_files -eq 1 ]; then
   info+=" Device_files"
     echo "||------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"
@@ -55,12 +55,7 @@ function data_ordenation() {
   echo
 }
 
-# Al entregarla cambiarle el nombre a system_info
-function definitive_function() {
-  echo
-}
-
-function device_files() {
+function system_info() {
   if [ $bool_inv -eq 1 ]; then
     # Añadimos el -r para que ordene de forma inversa
     sort_method+=" -r"
@@ -89,13 +84,10 @@ function device_files() {
         lines+="$line $total_used $stat_lower $stat_higher"
         lines+=$'\n'
       else 
-        lines+="$line $total_used * *"
+        lines+="$line $total_used - -"
         lines+=$'\n'
       fi
     fi
-
-    #tabla="$tabla""$line"
-    #tabla+=$'\n'"||---------------------------------------------------------------------------------------------------------------------------------------------------------||"$'\n'                               
   done
 }
 
@@ -159,5 +151,5 @@ else
 fi
 # Ejecución de las funciones necesarias
 print_header
-device_files
+system_info
 print_table
