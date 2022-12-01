@@ -186,13 +186,14 @@ if [ $# -gt 0 ]; then
         shift
         ;;
       * )
-        echo $1
+        echo "You have introduced an invalid option"
+        exit 1
         shift
         ;;
     esac
   done
 else
-  echo
+  echo 
 fi
 # Ejecución de las funciones necesarias
 print_header
