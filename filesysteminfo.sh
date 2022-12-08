@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# TODO:
-# - Usuarios
-# - Ordenaciones: 
-#   - sopen: La ordenación se hará por el número de archivos abiertos, y solo se podrá usar con las opciones -devicefiles y/o -u, dado que solo se considerarán los dispositivos con archivos de dispositivo asociados. 
-#Si no se cumple esta regla debe producirse un error que deberá ser gestionado correctamente en el script.
-#   - sdevice: la ordenación se realizará por el número total de dispositivos considerados para cada sistema de archivos.
-#   - inv: la ordenación se realizará por el número total de dispositivos considerados para cada sistema de archivos, pero en orden inverso.
-#  DEBEN PODER SER USADAS JUNTAS, POR EJEMPLO: -sopen -inv -u sernics
-
 # Esta linea la pongo para que se me ejecute el script en modo desarrollador
 set -e
 
@@ -76,10 +67,6 @@ function print_table() {
       echo "||-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------||"
     fi
   fi
-}
-
-function data_ordenation() {
-  echo
 }
 
 function system_info() {
@@ -192,8 +179,6 @@ if [ $# -gt 0 ]; then
         ;;
     esac
   done
-else
-  echo 
 fi
 # Ejecución de las funciones necesarias
 print_header
